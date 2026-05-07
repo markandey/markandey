@@ -2,11 +2,13 @@ import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { supabase } from '@packages/db'
 import { DetailsTab } from '../components/DetailsTab'
+import { ResponsibilitiesTab } from '../components/ResponsibilitiesTab'
+import { PeopleTab } from '../components/PeopleTab'
 import { EssentialsTab } from '../components/EssentialsTab'
-import { SignupTab } from '../components/SignupTab'
 import { NotesTab } from '../components/NotesTab'
+import { LogsTab } from '../components/LogsTab'
 
-const TABS = ['Details', 'Essentials', 'Signup', 'Notes'] as const
+const TABS = ['Details', 'Responsibilities', 'People', 'Essentials', 'Notes', 'Logs'] as const
 type Tab = typeof TABS[number]
 
 const STORAGE_KEY = 'camp_planner_name'
@@ -94,9 +96,11 @@ export function PlanPage() {
 
       <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
         {activeTab === 'Details' && <DetailsTab planId={planId!} />}
-        {activeTab === 'Essentials' && <EssentialsTab planId={planId!} userName={userName} />}
-        {activeTab === 'Signup' && <SignupTab planId={planId!} userName={userName} />}
+        {activeTab === 'Responsibilities' && <ResponsibilitiesTab planId={planId!} userName={userName} />}
+        {activeTab === 'People' && <PeopleTab planId={planId!} userName={userName} />}
+        {activeTab === 'Essentials' && <EssentialsTab planId={planId!} />}
         {activeTab === 'Notes' && <NotesTab planId={planId!} userName={userName} />}
+        {activeTab === 'Logs' && <LogsTab planId={planId!} />}
       </main>
     </div>
   )

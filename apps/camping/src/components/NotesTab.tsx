@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@packages/db'
+import { addLog } from '../utils/log'
 
 interface Note {
   id: string
@@ -40,6 +41,7 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
       text: newNote.trim(),
       author: userName,
     })
+    addLog(planId, userName, `Added note: ${newNote.trim().slice(0, 50)}`)
     setNewNote('')
   }
 

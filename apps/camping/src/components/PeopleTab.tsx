@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@packages/db'
+import { addLog } from '../utils/log'
 
 interface Signup {
   id: string
@@ -7,7 +8,7 @@ interface Signup {
   created_at: string
 }
 
-export function SignupTab({ planId, userName }: { planId: string; userName: string }) {
+export function PeopleTab({ planId, userName }: { planId: string; userName: string }) {
   const [signups, setSignups] = useState<Signup[]>([])
   const [name, setName] = useState(userName)
 
@@ -36,6 +37,7 @@ export function SignupTab({ planId, userName }: { planId: string; userName: stri
       plan_id: planId,
       name: name.trim(),
     })
+    addLog(planId, name.trim(), 'Joined the trip')
     setName('')
   }
 
