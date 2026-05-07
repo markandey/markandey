@@ -1,6 +1,7 @@
 -- Camping plans (the random URL slug is the id)
 CREATE TABLE camping_plans (
   id text PRIMARY KEY,
+  content text NOT NULL DEFAULT '',
   created_at timestamptz DEFAULT now()
 );
 

@@ -1,18 +1,19 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router'
 import { supabase } from '@packages/db'
+import { DetailsTab } from '../components/DetailsTab'
 import { EssentialsTab } from '../components/EssentialsTab'
 import { SignupTab } from '../components/SignupTab'
 import { NotesTab } from '../components/NotesTab'
 
-const TABS = ['Essentials', 'Signup', 'Notes'] as const
+const TABS = ['Details', 'Essentials', 'Signup', 'Notes'] as const
 type Tab = typeof TABS[number]
 
 const STORAGE_KEY = 'camp_planner_name'
 
 export function PlanPage() {
   const { planId } = useParams()
-  const [activeTab, setActiveTab] = useState<Tab>('Essentials')
+  const [activeTab, setActiveTab] = useState<Tab>('Details')
   const [exists, setExists] = useState<boolean | null>(null)
   const [userName, setUserName] = useState(() => localStorage.getItem(STORAGE_KEY) || '')
   const [nameInput, setNameInput] = useState('')
@@ -92,6 +93,7 @@ export function PlanPage() {
       </div>
 
       <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
+        {activeTab === 'Details' && <DetailsTab planId={planId!} />}
         {activeTab === 'Essentials' && <EssentialsTab planId={planId!} userName={userName} />}
         {activeTab === 'Signup' && <SignupTab planId={planId!} userName={userName} />}
         {activeTab === 'Notes' && <NotesTab planId={planId!} userName={userName} />}
