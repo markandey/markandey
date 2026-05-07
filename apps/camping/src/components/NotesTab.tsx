@@ -29,7 +29,6 @@ const PAGE_SIZE = 20
 
 export function NotesTab({ planId, userName }: { planId: string; userName: string }) {
   const [notes, setNotes] = useState<Note[]>([])
-  const [optimisticNotes, setOptimisticNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editText, setEditText] = useState('')
@@ -42,7 +41,6 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
       .channel(`notes-${planId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'camping_notes', filter: `plan_id=eq.${planId}` }, () => {
         loadNotes()
-        setOptimisticNotes([])
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -71,20 +69,21 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
   async function addNote(e: React.FormEvent) {
     e.preventDefault()
     if (!newNote.trim()) return
+    const text = newNote.trim()
     const optimistic: Note = {
       id: `optimistic-${Date.now()}`,
-      text: newNote.trim(),
+      text,
       author: userName,
       created_at: new Date().toISOString(),
     }
-    setOptimisticNotes((prev) => [optimistic, ...prev])
+    setNotes((prev) => [optimistic, ...prev])
     setNewNote('')
     await supabase.from('camping_notes').insert({
       plan_id: planId,
-      text: optimistic.text,
+      text,
       author: userName,
     })
-    addLog(planId, userName, `Added note: ${optimistic.text.slice(0, 50)}`)
+    addLog(planId, userName, `Added note: ${text.slice(0, 50)}`)
   }
 
   async function deleteNote(id: string) {
@@ -103,7 +102,6 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
     setEditText(note.text)
   }
 
-  const allNotes = [...optimisticNotes, ...notes]
   const hasMore = totalCount > visibleCount
 
   return (
@@ -122,8 +120,8 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
       </form>
 
       <div className="space-y-2">
-        {allNotes.map((note) => (
-          <div key={note.id} className={`bg-white p-3 rounded-lg border border-gray-200 ${note.id.startsWith('optimistic-') ? 'opacity-70' : ''}`}>
+        {notes.map((note) => (
+          <div key={note.id} className="bg-white p-3 rounded-lg border border-gray-200">
             {editingId === note.id ? (
               <div className="flex gap-2">
                 <input
@@ -155,7 +153,7 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
           </div>
         ))}
       </div>
-      {allNotes.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No notes yet</p>}
+      {notes.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No notes yet</p>}
       {hasMore && (
         <button
           onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}

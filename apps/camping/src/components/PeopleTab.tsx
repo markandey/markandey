@@ -10,7 +10,6 @@ interface Signup {
 
 export function PeopleTab({ planId, userName }: { planId: string; userName: string }) {
   const [signups, setSignups] = useState<Signup[]>([])
-  const [optimisticSignups, setOptimisticSignups] = useState<Signup[]>([])
   const [name, setName] = useState(userName)
 
   useEffect(() => {
@@ -19,7 +18,6 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
       .channel(`signups-${planId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'camping_signups', filter: `plan_id=eq.${planId}` }, () => {
         loadSignups()
-        setOptimisticSignups([])
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -37,13 +35,13 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
   async function addSignup(e: React.FormEvent) {
     e.preventDefault()
     if (!name.trim()) return
+    const trimmedName = name.trim()
     const optimistic: Signup = {
       id: `optimistic-${Date.now()}`,
-      name: name.trim(),
+      name: trimmedName,
       created_at: new Date().toISOString(),
     }
-    setOptimisticSignups((prev) => [...prev, optimistic])
-    const trimmedName = name.trim()
+    setSignups((prev) => [...prev, optimistic])
     setName('')
     await supabase.from('camping_signups').insert({
       plan_id: planId,
@@ -53,10 +51,9 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
   }
 
   async function removeSignup(id: string) {
+    setSignups((prev) => prev.filter((s) => s.id !== id))
     await supabase.from('camping_signups').delete().eq('id', id)
   }
-
-  const allSignups = [...signups, ...optimisticSignups]
 
   return (
     <div>
@@ -73,17 +70,15 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
       </form>
 
       <div className="space-y-2">
-        {allSignups.map((s) => (
-          <div key={s.id} className={`flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200 ${s.id.startsWith('optimistic-') ? 'opacity-70' : ''}`}>
+        {signups.map((s) => (
+          <div key={s.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
             <span className="text-sm font-medium">{s.name}</span>
-            {!s.id.startsWith('optimistic-') && (
-              <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
-            )}
+            <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
           </div>
         ))}
       </div>
-      {allSignups.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No one signed up yet</p>}
-      {allSignups.length > 0 && <p className="text-gray-400 text-xs mt-4">{allSignups.length} going</p>}
+      {signups.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No one signed up yet</p>}
+      {signups.length > 0 && <p className="text-gray-400 text-xs mt-4">{signups.length} going</p>}
     </div>
   )
 }

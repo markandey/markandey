@@ -11,7 +11,6 @@ interface Essential {
 
 export function ResponsibilitiesTab({ planId, userName }: { planId: string; userName: string }) {
   const [items, setItems] = useState<Essential[]>([])
-  const [optimisticItems, setOptimisticItems] = useState<Essential[]>([])
   const [newItem, setNewItem] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
   const [editBy, setEditBy] = useState('')
@@ -22,7 +21,6 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
       .channel(`essentials-${planId}`)
       .on('postgres_changes', { event: '*', schema: 'public', table: 'camping_essentials', filter: `plan_id=eq.${planId}` }, () => {
         loadItems()
-        setOptimisticItems([])
       })
       .subscribe()
     return () => { supabase.removeChannel(channel) }
@@ -40,14 +38,14 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
   async function addItem(e: React.FormEvent) {
     e.preventDefault()
     if (!newItem.trim()) return
+    const trimmedItem = newItem.trim()
     const optimistic: Essential = {
       id: `optimistic-${Date.now()}`,
-      item: newItem.trim(),
+      item: trimmedItem,
       brought_by: userName,
       checked: false,
     }
-    setOptimisticItems((prev) => [...prev, optimistic])
-    const trimmedItem = newItem.trim()
+    setItems((prev) => [...prev, optimistic])
     setNewItem('')
     await supabase.from('camping_essentials').insert({
       plan_id: planId,
@@ -58,10 +56,12 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
   }
 
   async function toggleItem(item: Essential) {
+    setItems((prev) => prev.map((i) => i.id === item.id ? { ...i, checked: !i.checked } : i))
     await supabase.from('camping_essentials').update({ checked: !item.checked }).eq('id', item.id)
   }
 
   async function deleteItem(id: string) {
+    setItems((prev) => prev.filter((i) => i.id !== id))
     await supabase.from('camping_essentials').delete().eq('id', id)
   }
 
@@ -72,12 +72,11 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
 
   async function saveEditBy(id: string) {
     if (!editBy.trim()) return
+    setItems((prev) => prev.map((i) => i.id === id ? { ...i, brought_by: editBy.trim() } : i))
     await supabase.from('camping_essentials').update({ brought_by: editBy.trim() }).eq('id', id)
     setEditingId(null)
     setEditBy('')
   }
-
-  const allItems = [...items, ...optimisticItems]
 
   return (
     <div>
@@ -94,14 +93,13 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
       </form>
 
       <ul className="space-y-2">
-        {allItems.map((item) => (
-          <li key={item.id} className={`flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 ${item.id.startsWith('optimistic-') ? 'opacity-70' : ''}`}>
+        {items.map((item) => (
+          <li key={item.id} className="flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200">
             <input
               type="checkbox"
               checked={item.checked}
               onChange={() => toggleItem(item)}
               className="w-4 h-4 accent-green-600"
-              disabled={item.id.startsWith('optimistic-')}
             />
             <span className={`flex-1 text-sm ${item.checked ? 'line-through text-gray-400' : ''}`}>
               {item.item}
@@ -122,18 +120,15 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
               <button
                 onClick={() => startEditBy(item)}
                 className="text-xs text-gray-400 hover:text-gray-600 hover:underline"
-                disabled={item.id.startsWith('optimistic-')}
               >
                 {item.brought_by}
               </button>
             )}
-            {!item.id.startsWith('optimistic-') && (
-              <button onClick={() => deleteItem(item.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
-            )}
+            <button onClick={() => deleteItem(item.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
           </li>
         ))}
       </ul>
-      {allItems.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No responsibilities added yet</p>}
+      {items.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No responsibilities added yet</p>}
     </div>
   )
 }
