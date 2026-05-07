@@ -4,10 +4,11 @@ import { supabase } from '@packages/db'
 interface Note {
   id: string
   text: string
+  author: string
   created_at: string
 }
 
-export function NotesTab({ planId }: { planId: string }) {
+export function NotesTab({ planId, userName }: { planId: string; userName: string }) {
   const [notes, setNotes] = useState<Note[]>([])
   const [newNote, setNewNote] = useState('')
   const [editingId, setEditingId] = useState<string | null>(null)
@@ -37,6 +38,7 @@ export function NotesTab({ planId }: { planId: string }) {
     await supabase.from('camping_notes').insert({
       plan_id: planId,
       text: newNote.trim(),
+      author: userName,
     })
     setNewNote('')
   }
@@ -89,7 +91,10 @@ export function NotesTab({ planId }: { planId: string }) {
               </div>
             ) : (
               <div className="flex items-start justify-between gap-2">
-                <p className="text-sm flex-1">{note.text}</p>
+                <p className="text-sm flex-1">
+                  <span className="font-medium text-green-700">{note.author}: </span>
+                  {note.text}
+                </p>
                 <div className="flex gap-2 shrink-0">
                   <button onClick={() => startEdit(note)} className="text-gray-400 hover:text-gray-600 text-xs">Edit</button>
                   <button onClick={() => deleteNote(note.id)} className="text-red-400 hover:text-red-600 text-xs">Delete</button>

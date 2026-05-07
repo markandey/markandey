@@ -8,10 +8,11 @@ interface Essential {
   checked: boolean
 }
 
-export function EssentialsTab({ planId }: { planId: string }) {
+export function EssentialsTab({ planId, userName }: { planId: string; userName: string }) {
   const [items, setItems] = useState<Essential[]>([])
   const [newItem, setNewItem] = useState('')
-  const [newBy, setNewBy] = useState('')
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editBy, setEditBy] = useState('')
 
   useEffect(() => {
     loadItems()
@@ -37,10 +38,9 @@ export function EssentialsTab({ planId }: { planId: string }) {
     await supabase.from('camping_essentials').insert({
       plan_id: planId,
       item: newItem.trim(),
-      brought_by: newBy.trim() || 'TBD',
+      brought_by: userName,
     })
     setNewItem('')
-    setNewBy('')
   }
 
   async function toggleItem(item: Essential) {
@@ -51,24 +51,28 @@ export function EssentialsTab({ planId }: { planId: string }) {
     await supabase.from('camping_essentials').delete().eq('id', id)
   }
 
+  function startEditBy(item: Essential) {
+    setEditingId(item.id)
+    setEditBy(item.brought_by)
+  }
+
+  async function saveEditBy(id: string) {
+    if (!editBy.trim()) return
+    await supabase.from('camping_essentials').update({ brought_by: editBy.trim() }).eq('id', id)
+    setEditingId(null)
+    setEditBy('')
+  }
+
   return (
     <div>
-      <form onSubmit={addItem} className="flex flex-col gap-2 mb-4">
-        <div className="flex gap-2">
-          <input
-            value={newItem}
-            onChange={(e) => setNewItem(e.target.value)}
-            placeholder="Item (tent, stove, cooler...)"
-            className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
-          />
-          <input
-            value={newBy}
-            onChange={(e) => setNewBy(e.target.value)}
-            placeholder="Who's bringing?"
-            className="w-32 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
-          />
-        </div>
-        <button type="submit" className="self-start px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+      <form onSubmit={addItem} className="flex gap-2 mb-4">
+        <input
+          value={newItem}
+          onChange={(e) => setNewItem(e.target.value)}
+          placeholder="Item (tent, stove, cooler...)"
+          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
+        />
+        <button type="submit" className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
           Add
         </button>
       </form>
@@ -85,7 +89,26 @@ export function EssentialsTab({ planId }: { planId: string }) {
             <span className={`flex-1 text-sm ${item.checked ? 'line-through text-gray-400' : ''}`}>
               {item.item}
             </span>
-            <span className="text-xs text-gray-400">{item.brought_by}</span>
+            {editingId === item.id ? (
+              <div className="flex gap-1 items-center">
+                <input
+                  value={editBy}
+                  onChange={(e) => setEditBy(e.target.value)}
+                  className="w-24 px-2 py-1 border border-gray-300 rounded text-xs outline-none focus:ring-2 focus:ring-green-500"
+                  autoFocus
+                  onKeyDown={(e) => e.key === 'Enter' && saveEditBy(item.id)}
+                />
+                <button onClick={() => saveEditBy(item.id)} className="text-green-600 text-xs">Save</button>
+                <button onClick={() => setEditingId(null)} className="text-gray-400 text-xs">✕</button>
+              </div>
+            ) : (
+              <button
+                onClick={() => startEditBy(item)}
+                className="text-xs text-gray-400 hover:text-gray-600 hover:underline"
+              >
+                {item.brought_by}
+              </button>
+            )}
             <button onClick={() => deleteItem(item.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
           </li>
         ))}

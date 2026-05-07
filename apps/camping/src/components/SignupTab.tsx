@@ -7,9 +7,9 @@ interface Signup {
   created_at: string
 }
 
-export function SignupTab({ planId }: { planId: string }) {
+export function SignupTab({ planId, userName }: { planId: string; userName: string }) {
   const [signups, setSignups] = useState<Signup[]>([])
-  const [name, setName] = useState('')
+  const [name, setName] = useState(userName)
 
   useEffect(() => {
     loadSignups()

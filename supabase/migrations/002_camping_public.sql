@@ -27,6 +27,7 @@ CREATE TABLE camping_notes (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   plan_id text REFERENCES camping_plans(id) ON DELETE CASCADE NOT NULL,
   text text NOT NULL,
+  author text NOT NULL DEFAULT '',
   created_at timestamptz DEFAULT now()
 );
 
