@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@packages/db'
+import { addLog } from '../utils/log'
 
 const DEFAULT_CONTENT = `# Personal Essentials
 
@@ -31,7 +32,7 @@ const DEFAULT_CONTENT = `# Personal Essentials
 - Book
 `
 
-export function EssentialsTab({ planId }: { planId: string }) {
+export function EssentialsTab({ planId, userName }: { planId: string; userName: string }) {
   const [content, setContent] = useState('')
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
@@ -60,6 +61,7 @@ export function EssentialsTab({ planId }: { planId: string }) {
 
   async function save() {
     await supabase.from('camping_plans').update({ essentials_content: draft }).eq('id', planId)
+    addLog(planId, userName, 'Edited the Essentials page')
     setContent(draft)
     setEditing(false)
   }

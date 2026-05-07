@@ -95,10 +95,10 @@ export function PlanPage() {
       </div>
 
       <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
-        {activeTab === 'Details' && <DetailsTab planId={planId!} />}
+        {activeTab === 'Details' && <DetailsTab planId={planId!} userName={userName} />}
         {activeTab === 'Responsibilities' && <ResponsibilitiesTab planId={planId!} userName={userName} />}
         {activeTab === 'People' && <PeopleTab planId={planId!} userName={userName} />}
-        {activeTab === 'Essentials' && <EssentialsTab planId={planId!} />}
+        {activeTab === 'Essentials' && <EssentialsTab planId={planId!} userName={userName} />}
         {activeTab === 'Notes' && <NotesTab planId={planId!} userName={userName} />}
         {activeTab === 'Logs' && <LogsTab planId={planId!} />}
       </main>

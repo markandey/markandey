@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '@packages/db'
+import { addLog } from '../utils/log'
 
 function renderMarkdown(text: string) {
   const lines = text.split('\n')
@@ -46,7 +47,7 @@ Check the Essentials tab for the shared gear list.
 Add notes in the Notes tab to coordinate with the group.
 `
 
-export function DetailsTab({ planId }: { planId: string }) {
+export function DetailsTab({ planId, userName }: { planId: string; userName: string }) {
   const [content, setContent] = useState('')
   const [editing, setEditing] = useState(false)
   const [draft, setDraft] = useState('')
@@ -75,6 +76,7 @@ export function DetailsTab({ planId }: { planId: string }) {
 
   async function save() {
     await supabase.from('camping_plans').update({ content: draft }).eq('id', planId)
+    addLog(planId, userName, 'Edited the Details page')
     setContent(draft)
     setEditing(false)
   }
