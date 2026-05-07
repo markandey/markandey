@@ -1,4 +1,3 @@
--- Trips table
 CREATE TABLE trips (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   name text NOT NULL,
@@ -9,7 +8,6 @@ CREATE TABLE trips (
   created_at timestamptz DEFAULT now()
 );
 
--- Trip members
 CREATE TABLE trip_members (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   trip_id uuid REFERENCES trips(id) ON DELETE CASCADE NOT NULL,
@@ -20,7 +18,6 @@ CREATE TABLE trip_members (
   UNIQUE(trip_id, email)
 );
 
--- Checklist items
 CREATE TABLE checklist_items (
   id uuid DEFAULT gen_random_uuid() PRIMARY KEY,
   trip_id uuid REFERENCES trips(id) ON DELETE CASCADE NOT NULL,
@@ -31,12 +28,10 @@ CREATE TABLE checklist_items (
   created_at timestamptz DEFAULT now()
 );
 
--- Enable RLS
 ALTER TABLE trips ENABLE ROW LEVEL SECURITY;
 ALTER TABLE trip_members ENABLE ROW LEVEL SECURITY;
 ALTER TABLE checklist_items ENABLE ROW LEVEL SECURITY;
 
--- Trips: viewable by creator or members
 CREATE POLICY "Users can view trips they belong to" ON trips
   FOR SELECT USING (
     created_by = auth.uid()
@@ -52,7 +47,6 @@ CREATE POLICY "Trip creator can update" ON trips
 CREATE POLICY "Trip creator can delete" ON trips
   FOR DELETE USING (created_by = auth.uid());
 
--- Trip members: viewable by trip participants
 CREATE POLICY "Trip participants can view members" ON trip_members
   FOR SELECT USING (
     trip_id IN (SELECT id FROM trips WHERE created_by = auth.uid())
@@ -69,7 +63,6 @@ CREATE POLICY "Trip creator can remove members" ON trip_members
     trip_id IN (SELECT id FROM trips WHERE created_by = auth.uid())
   );
 
--- Checklist items: editable by trip participants
 CREATE POLICY "Trip participants can view items" ON checklist_items
   FOR SELECT USING (
     trip_id IN (SELECT id FROM trips WHERE created_by = auth.uid())
@@ -94,7 +87,6 @@ CREATE POLICY "Item creator or trip owner can delete items" ON checklist_items
     OR trip_id IN (SELECT id FROM trips WHERE created_by = auth.uid())
   );
 
--- Auto-add creator as owner member when trip is created
 CREATE OR REPLACE FUNCTION add_trip_owner()
 RETURNS TRIGGER AS $$
 BEGIN
@@ -108,7 +100,6 @@ CREATE TRIGGER on_trip_created
   AFTER INSERT ON trips
   FOR EACH ROW EXECUTE FUNCTION add_trip_owner();
 
--- Enable realtime
 ALTER PUBLICATION supabase_realtime ADD TABLE trips;
 ALTER PUBLICATION supabase_realtime ADD TABLE checklist_items;
 ALTER PUBLICATION supabase_realtime ADD TABLE trip_members;
