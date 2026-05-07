@@ -1,0 +1,16 @@
+{
+  "name": "@apps/camping",
+  "private": true,
+  "version": "0.0.1",
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "dependencies": {
+    "@packages/db": "workspace:*",
+    "@packages/auth": "workspace:*",
+    "@packages/ui": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19",
+    "react-router": "^7"
+  }
+}

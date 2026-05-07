@@ -1,0 +1,13 @@
+{
+  "name": "@packages/auth",
+  "version": "0.0.1",
+  "private": true,
+  "main": "./src/index.tsx",
+  "types": "./src/index.tsx",
+  "dependencies": {
+    "@packages/db": "workspace:*"
+  },
+  "peerDependencies": {
+    "react": "^19"
+  }
+}
