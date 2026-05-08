@@ -21,7 +21,7 @@ const TAB_META: Record<Tab, { short: string }> = {
 }
 
 function TabIcon({ tab, active }: { tab: Tab; active: boolean }) {
-  const stroke = active ? '#16a34a' : '#9ca3af'
+  const stroke = active ? 'var(--accent)' : 'var(--text-muted)'
   const props = { width: 22, height: 22, fill: 'none', stroke, strokeWidth: 1.5, strokeLinecap: 'round' as const, strokeLinejoin: 'round' as const }
 
   switch (tab) {
@@ -74,7 +74,7 @@ export function PlanPage() {
   const [nameInput, setNameInput] = useState('')
 
   useEffect(() => {
-    document.title = 'Camp Planner'
+    document.title = 'Platr'
     if (!planId) return
     supabase
       .from('camping_plans')
@@ -93,12 +93,13 @@ export function PlanPage() {
   }
 
   if (exists === null) {
-    return <div className="min-h-screen flex items-center justify-center text-gray-500">Loading...</div>
+    return <div className="min-h-screen bg-forest flex items-center justify-center text-[var(--text-secondary)]"><div className="stars" />Loading...</div>
   }
 
   if (!exists) {
     return (
-      <div className="min-h-screen flex items-center justify-center text-gray-500 px-4">
+      <div className="min-h-screen bg-forest flex items-center justify-center text-[var(--text-secondary)] px-4">
+        <div className="stars" />
         Plan not found.
       </div>
     )
@@ -106,17 +107,19 @@ export function PlanPage() {
 
   if (!userName) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center px-4">
-        <form onSubmit={submitName} className="bg-white p-6 rounded-xl shadow-sm border border-gray-200 w-full max-w-sm">
-          <h2 className="text-lg font-semibold mb-4 text-center">What's your name?</h2>
+      <div className="min-h-screen bg-forest flex items-center justify-center px-4">
+        <div className="stars" />
+        <form onSubmit={submitName} className="relative z-10 bg-[var(--bg-card)] p-6 rounded-xl shadow-lg border border-[var(--border)] w-full max-w-sm">
+          <h2 className="text-lg font-semibold mb-2 text-center text-[var(--text-primary)]">Welcome to Platr</h2>
+          <p className="text-sm text-[var(--text-secondary)] text-center mb-4">Enter your name to join the plan</p>
           <input
             value={nameInput}
             onChange={(e) => setNameInput(e.target.value)}
-            placeholder="Enter your name"
-            className="w-full px-4 py-3 border border-gray-300 rounded-lg text-base outline-none focus:ring-2 focus:ring-green-500 mb-4"
+            placeholder="Your name"
+            className="w-full px-4 py-3 bg-[var(--bg-secondary)] border border-[var(--border)] rounded-lg text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--accent)] mb-4"
             autoFocus
           />
-          <button type="submit" className="w-full px-4 py-3 bg-green-600 text-white font-medium rounded-lg hover:bg-green-700 active:bg-green-800 text-base">
+          <button type="submit" className="w-full px-4 py-3 bg-[var(--accent)] text-[var(--bg-primary)] font-semibold rounded-lg hover:bg-[var(--accent-hover)] active:brightness-110 text-base">
             Join Plan
           </button>
         </form>
@@ -125,13 +128,14 @@ export function PlanPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 flex flex-col">
-      <header className="bg-white border-b border-gray-200 px-4 py-3 flex items-center justify-between safe-top">
-        <h1 className="font-bold text-lg text-gray-900">Camp Planner</h1>
-        <span className="text-sm text-gray-500">{userName}</span>
+    <div className="min-h-screen bg-forest flex flex-col">
+      <div className="stars" />
+      <header className="relative z-10 bg-[var(--bg-secondary)]/80 backdrop-blur-sm border-b border-[var(--border)] px-4 py-3 flex items-center justify-between">
+        <h1 className="font-bold text-lg text-[var(--accent)]">Platr</h1>
+        <span className="text-sm text-[var(--text-secondary)]">{userName}</span>
       </header>
 
-      <nav className="hidden sm:block border-b border-gray-200 bg-white">
+      <nav className="relative z-10 hidden sm:block border-b border-[var(--border)] bg-[var(--bg-secondary)]/60 backdrop-blur-sm">
         <div className="flex px-2 max-w-2xl mx-auto">
           {TABS.map((tab) => (
             <button
@@ -139,8 +143,8 @@ export function PlanPage() {
               onClick={() => setActiveTab(tab)}
               className={`px-4 py-3 text-sm font-medium whitespace-nowrap border-b-2 transition-colors min-h-[44px] flex items-center gap-1.5 ${
                 activeTab === tab
-                  ? 'border-green-600 text-green-600'
-                  : 'border-transparent text-gray-500 hover:text-gray-700'
+                  ? 'border-[var(--accent)] text-[var(--accent)]'
+                  : 'border-transparent text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
               }`}
             >
               <TabIcon tab={tab} active={activeTab === tab} />
@@ -150,7 +154,7 @@ export function PlanPage() {
         </div>
       </nav>
 
-      <main className="flex-1 p-4 max-w-2xl mx-auto w-full pb-24 sm:pb-8">
+      <main className="relative z-10 flex-1 p-4 max-w-2xl mx-auto w-full pb-24 sm:pb-8">
         {activeTab === 'Home' && <DetailsTab planId={planId!} userName={userName} />}
         {activeTab === 'Personal Items List' && <EssentialsTab planId={planId!} userName={userName} />}
         {activeTab === 'People' && <PeopleTab planId={planId!} userName={userName} />}
@@ -159,7 +163,7 @@ export function PlanPage() {
         {activeTab === 'Logs' && <LogsTab planId={planId!} />}
       </main>
 
-      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 safe-bottom">
+      <nav className="sm:hidden fixed bottom-0 left-0 right-0 bg-[var(--bg-secondary)]/95 backdrop-blur-sm border-t border-[var(--border)] safe-bottom z-20">
         <div className="grid grid-cols-6">
           {TABS.map((tab) => (
             <button
@@ -167,8 +171,8 @@ export function PlanPage() {
               onClick={() => setActiveTab(tab)}
               className={`flex flex-col items-center justify-center py-2 min-h-[56px] transition-colors ${
                 activeTab === tab
-                  ? 'text-green-600'
-                  : 'text-gray-400 active:text-gray-600'
+                  ? 'text-[var(--accent)]'
+                  : 'text-[var(--text-muted)] active:text-[var(--text-secondary)]'
               }`}
             >
               <TabIcon tab={tab} active={activeTab === tab} />

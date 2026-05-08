@@ -104,19 +104,19 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
     return (
       <>
         {node.signups.map((s) => (
-          <div key={s.id} className={`flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200`} style={{ marginLeft: `${depth * 1.25}rem` }}>
-            <span className="text-sm font-medium">{s.name}</span>
+          <div key={s.id} className={`flex items-center justify-between bg-[var(--bg-card)] p-4 rounded-lg border border-[var(--border)]`} style={{ marginLeft: `${depth * 1.25}rem` }}>
+            <span className="text-sm font-medium text-[var(--text-primary)]">{s.name}</span>
             {!s.id.startsWith('optimistic-') ? (
-              <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 active:text-red-800 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">✕</button>
+              <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-300 active:text-red-200 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">✕</button>
             ) : (
-              <span className="text-gray-300 text-xs min-h-[44px] flex items-center">saving...</span>
+              <span className="text-[var(--text-muted)] text-xs min-h-[44px] flex items-center">saving...</span>
             )}
           </div>
         ))}
         {Array.from(node.children.values()).map((child) => (
           <div key={child.label} className="space-y-2">
-            <h3 className="text-sm font-semibold text-gray-700 border-b border-gray-100 pb-1 mt-2" style={{ marginLeft: `${depth * 1.25}rem` }}>
-              {child.label} <span className="text-xs font-normal text-gray-400">({countNode(child)})</span>
+            <h3 className="text-sm font-semibold text-[var(--accent)] border-b border-[var(--border)] pb-1 mt-2" style={{ marginLeft: `${depth * 1.25}rem` }}>
+              {child.label} <span className="text-xs font-normal text-[var(--text-muted)]">({countNode(child)})</span>
             </h3>
             {renderNode(child, depth + 1)}
           </div>
@@ -127,16 +127,16 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-800">People</h2>
-      <p className="text-sm text-gray-500 mb-4">Who's coming? Use colons to group people (e.g. "veg:markandey" or "family:markandey:agastya" for nested groups).</p>
+      <h2 className="text-lg font-semibold text-[var(--text-primary)]">People</h2>
+      <p className="text-sm text-[var(--text-secondary)] mb-4">Who's coming? Use colons to group people (e.g. "veg:markandey" or "family:markandey:agastya" for nested groups).</p>
       <form onSubmit={addSignup} className="flex gap-2 mb-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name or group:subgroup:name"
-          className="flex-1 px-3 py-3 border border-gray-300 rounded-lg text-base outline-none focus:ring-2 focus:ring-green-500 min-h-[44px]"
+          className="flex-1 px-3 py-3 bg-[var(--bg-card)] border border-[var(--border)] rounded-lg text-base text-[var(--text-primary)] placeholder-[var(--text-muted)] outline-none focus:ring-2 focus:ring-[var(--accent)] min-h-[44px]"
         />
-        <button type="submit" className="px-4 py-3 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 active:bg-green-800 min-h-[44px]">
+        <button type="submit" className="px-4 py-3 bg-[var(--accent)] text-[var(--bg-primary)] text-sm font-semibold rounded-lg hover:bg-[var(--accent-hover)] active:brightness-110 min-h-[44px]">
           I'm in!
         </button>
       </form>
@@ -144,8 +144,8 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
       <div className="space-y-2">
         {renderNode(tree)}
       </div>
-      {signups.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No one signed up yet</p>}
-      {signups.length > 0 && <p className="text-gray-400 text-xs mt-4">{signups.length} going</p>}
+      {signups.length === 0 && <p className="text-[var(--text-muted)] text-sm text-center py-8">No one signed up yet</p>}
+      {signups.length > 0 && <p className="text-[var(--text-muted)] text-xs mt-4">{signups.length} going</p>}
     </div>
   )
 }

@@ -48,30 +48,30 @@ export function LogsTab({ planId }: { planId: string }) {
 
   const hasMore = totalCount > visibleCount
 
-  if (loading) return <div className="text-gray-400 text-sm py-8 text-center">Loading...</div>
+  if (loading) return <div className="text-[var(--text-muted)] text-sm py-8 text-center">Loading...</div>
 
   return (
     <div>
-      <h2 className="text-lg font-semibold text-gray-800">Activity Log</h2>
-      <p className="text-sm text-gray-500 mb-4">A timeline of everything that's happened on this plan.</p>
+      <h2 className="text-lg font-semibold text-[var(--text-primary)]">Activity Log</h2>
+      <p className="text-sm text-[var(--text-secondary)] mb-4">A timeline of everything that's happened on this plan.</p>
       {logs.length === 0 ? (
-        <p className="text-gray-400 text-sm text-center py-8">No activity yet</p>
+        <p className="text-[var(--text-muted)] text-sm text-center py-8">No activity yet</p>
       ) : (
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="border-b border-gray-200">
-                <th className="text-left py-2 px-3 font-medium text-gray-500 w-8">#</th>
-                <th className="text-left py-2 px-3 font-medium text-gray-500">Who</th>
-                <th className="text-left py-2 px-3 font-medium text-gray-500">What</th>
+              <tr className="border-b border-[var(--border)]">
+                <th className="text-left py-2 px-3 font-medium text-[var(--text-muted)] w-8">#</th>
+                <th className="text-left py-2 px-3 font-medium text-[var(--text-muted)]">Who</th>
+                <th className="text-left py-2 px-3 font-medium text-[var(--text-muted)]">What</th>
               </tr>
             </thead>
             <tbody>
               {logs.map((log, idx) => (
-                <tr key={log.id} className="border-b border-gray-100">
-                  <td className="py-2 px-3 text-gray-300 text-xs">{totalCount - idx}</td>
-                  <td className="py-2 px-3 font-medium text-green-700">{log.who}</td>
-                  <td className="py-2 px-3 text-gray-700">{log.what}</td>
+                <tr key={log.id} className="border-b border-[var(--border)]/50">
+                  <td className="py-2 px-3 text-[var(--text-muted)] text-xs">{totalCount - idx}</td>
+                  <td className="py-2 px-3 font-medium text-[var(--accent)]">{log.who}</td>
+                  <td className="py-2 px-3 text-[var(--text-primary)]">{log.what}</td>
                 </tr>
               ))}
             </tbody>
@@ -81,7 +81,7 @@ export function LogsTab({ planId }: { planId: string }) {
       {hasMore && (
         <button
           onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
-          className="mt-4 w-full py-2 text-sm text-green-600 hover:text-green-700 font-medium border border-gray-200 rounded-lg hover:bg-gray-50"
+          className="mt-4 w-full py-2 text-sm text-[var(--accent)] hover:text-[var(--accent-hover)] font-medium border border-[var(--border)] rounded-lg hover:bg-[var(--bg-card)]"
         >
           Load more
         </button>
