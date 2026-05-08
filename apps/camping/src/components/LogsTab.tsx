@@ -61,19 +61,17 @@ export function LogsTab({ planId }: { planId: string }) {
           <table className="w-full text-sm">
             <thead>
               <tr className="border-b border-gray-200">
+                <th className="text-left py-2 px-3 font-medium text-gray-500 w-8">#</th>
                 <th className="text-left py-2 px-3 font-medium text-gray-500">Who</th>
                 <th className="text-left py-2 px-3 font-medium text-gray-500">What</th>
-                <th className="text-left py-2 px-3 font-medium text-gray-500">When</th>
               </tr>
             </thead>
             <tbody>
-              {logs.map((log) => (
+              {logs.map((log, idx) => (
                 <tr key={log.id} className="border-b border-gray-100">
+                  <td className="py-2 px-3 text-gray-300 text-xs">{totalCount - idx}</td>
                   <td className="py-2 px-3 font-medium text-green-700">{log.who}</td>
                   <td className="py-2 px-3 text-gray-700">{log.what}</td>
-                  <td className="py-2 px-3 text-gray-400 whitespace-nowrap">
-                    {new Date(log.created_at).toLocaleString(undefined, { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' })}
-                  </td>
                 </tr>
               ))}
             </tbody>

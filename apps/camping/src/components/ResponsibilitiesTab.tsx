@@ -107,6 +107,7 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
       brought_by: assignTo,
     })
     addLog(planId, userName, `Added responsibility: ${trimmedItem}`)
+    loadItems()
   }
 
   async function toggleItem(item: Essential) {
@@ -115,8 +116,10 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
   }
 
   async function deleteItem(id: string) {
+    const item = items.find((i) => i.id === id)
     setItems((prev) => prev.filter((i) => i.id !== id))
     await supabase.from('camping_essentials').delete().eq('id', id)
+    if (item) addLog(planId, userName, `Removed responsibility: ${item.item}`)
   }
 
   function startEditBy(item: Essential) {
@@ -138,25 +141,27 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
     <div>
       <h2 className="text-lg font-semibold text-gray-800">Responsibilities</h2>
       <p className="text-sm text-gray-500 mb-4">Assign tasks and track who's handling what. Use "Category: task" format to group items (e.g. "Food: bring cooler").</p>
-      <form onSubmit={addItem} className="flex gap-2 mb-4">
+      <form onSubmit={addItem} className="flex flex-col sm:flex-row gap-2 mb-4">
         <input
           value={newItem}
           onChange={(e) => setNewItem(e.target.value)}
           placeholder="Task or Category: task"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 px-3 py-3 border border-gray-300 rounded-lg text-base outline-none focus:ring-2 focus:ring-green-500 min-h-[44px]"
         />
-        <select
-          value={assignTo}
-          onChange={(e) => setAssignTo(e.target.value)}
-          className="px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500 bg-white"
-        >
-          {assignOptions.map((name) => (
-            <option key={name} value={name}>{name}</option>
-          ))}
-        </select>
-        <button type="submit" className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
-          Add
-        </button>
+        <div className="flex gap-2">
+          <select
+            value={assignTo}
+            onChange={(e) => setAssignTo(e.target.value)}
+            className="flex-1 sm:flex-none px-3 py-3 border border-gray-300 rounded-lg text-base outline-none focus:ring-2 focus:ring-green-500 bg-white min-h-[44px]"
+          >
+            {assignOptions.map((name) => (
+              <option key={name} value={name}>{name}</option>
+            ))}
+          </select>
+          <button type="submit" className="px-4 py-3 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 active:bg-green-800 min-h-[44px] min-w-[44px]">
+            Add
+          </button>
+        </div>
       </form>
 
       <div className="space-y-4">
@@ -169,12 +174,12 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
               {group.items.map((item) => {
                 const displayName = item.item.includes(':') ? item.item.split(':').slice(1).join(':').trim() : item.item
                 return (
-                  <li key={item.id} className={`flex items-center gap-3 bg-white p-3 rounded-lg border border-gray-200 ${group.category ? 'ml-4' : ''}`}>
+                  <li key={item.id} className={`flex items-center gap-3 bg-white p-4 rounded-lg border border-gray-200 ${group.category ? 'ml-4' : ''}`}>
                     <input
                       type="checkbox"
                       checked={item.checked}
                       onChange={() => toggleItem(item)}
-                      className="w-4 h-4 accent-green-600"
+                      className="w-5 h-5 accent-green-600 min-w-[20px]"
                     />
                     <span className={`flex-1 text-sm ${item.checked ? 'line-through text-gray-400' : ''}`}>
                       {displayName}
@@ -199,8 +204,10 @@ export function ResponsibilitiesTab({ planId, userName }: { planId: string; user
                         {item.brought_by}
                       </button>
                     )}
-                    {!item.id.startsWith('optimistic-') && (
-                      <button onClick={() => deleteItem(item.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
+                    {!item.id.startsWith('optimistic-') ? (
+                      <button onClick={() => deleteItem(item.id)} className="text-red-400 hover:text-red-600 active:text-red-800 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">✕</button>
+                    ) : (
+                      <span className="text-gray-300 text-xs min-h-[44px] flex items-center">saving...</span>
                     )}
                   </li>
                 )

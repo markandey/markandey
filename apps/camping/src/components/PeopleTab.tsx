@@ -80,11 +80,14 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
       name: trimmedName,
     })
     addLog(planId, trimmedName, 'Joined the trip')
+    loadSignups()
   }
 
   async function removeSignup(id: string) {
+    const person = signups.find((s) => s.id === id)
     setSignups((prev) => prev.filter((s) => s.id !== id))
     await supabase.from('camping_signups').delete().eq('id', id)
+    if (person) addLog(planId, userName, `Removed ${person.name} from the trip`)
   }
 
   const tree = buildTree(signups)
@@ -101,10 +104,12 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
     return (
       <>
         {node.signups.map((s) => (
-          <div key={s.id} className={`flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200`} style={{ marginLeft: `${depth * 1.25}rem` }}>
+          <div key={s.id} className={`flex items-center justify-between bg-white p-4 rounded-lg border border-gray-200`} style={{ marginLeft: `${depth * 1.25}rem` }}>
             <span className="text-sm font-medium">{s.name}</span>
-            {!s.id.startsWith('optimistic-') && (
-              <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
+            {!s.id.startsWith('optimistic-') ? (
+              <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 active:text-red-800 text-sm min-h-[44px] min-w-[44px] flex items-center justify-center">✕</button>
+            ) : (
+              <span className="text-gray-300 text-xs min-h-[44px] flex items-center">saving...</span>
             )}
           </div>
         ))}
@@ -129,9 +134,9 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="Name or group:subgroup:name"
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 px-3 py-3 border border-gray-300 rounded-lg text-base outline-none focus:ring-2 focus:ring-green-500 min-h-[44px]"
         />
-        <button type="submit" className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+        <button type="submit" className="px-4 py-3 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 active:bg-green-800 min-h-[44px]">
           I'm in!
         </button>
       </form>

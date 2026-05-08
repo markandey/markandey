@@ -84,11 +84,14 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
       author: userName,
     })
     addLog(planId, userName, `Added note: ${text.slice(0, 50)}`)
+    loadNotes()
   }
 
   async function deleteNote(id: string) {
+    const note = notes.find((n) => n.id === id)
     setNotes((prev) => prev.filter((n) => n.id !== id))
     await supabase.from('camping_notes').delete().eq('id', id)
+    if (note) addLog(planId, userName, `Deleted note: ${note.text.slice(0, 50)}`)
   }
 
   async function saveEdit(id: string) {
@@ -114,17 +117,17 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
           value={newNote}
           onChange={(e) => setNewNote(e.target.value)}
           placeholder="Add a note..."
-          className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
+          className="flex-1 px-3 py-3 border border-gray-300 rounded-lg text-base outline-none focus:ring-2 focus:ring-green-500 min-h-[44px]"
           maxLength={280}
         />
-        <button type="submit" className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
+        <button type="submit" className="px-4 py-3 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700 active:bg-green-800 min-h-[44px] min-w-[44px]">
           Add
         </button>
       </form>
 
       <div className="space-y-2">
         {notes.map((note) => (
-          <div key={note.id} className="bg-white p-3 rounded-lg border border-gray-200">
+          <div key={note.id} className="bg-white p-4 rounded-lg border border-gray-200">
             {editingId === note.id ? (
               <div className="flex gap-2">
                 <input
@@ -145,11 +148,13 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
                   <span className="text-green-700">: </span>
                   {note.text}
                 </p>
-                {!note.id.startsWith('optimistic-') && (
-                  <div className="flex gap-2 shrink-0">
-                    <button onClick={() => startEdit(note)} className="text-gray-400 hover:text-gray-600 text-xs">Edit</button>
-                    <button onClick={() => deleteNote(note.id)} className="text-red-400 hover:text-red-600 text-xs">Delete</button>
+                {!note.id.startsWith('optimistic-') ? (
+                  <div className="flex gap-3 shrink-0">
+                    <button onClick={() => startEdit(note)} className="text-gray-400 hover:text-gray-600 active:text-gray-800 text-xs min-h-[44px] min-w-[44px] flex items-center justify-center">Edit</button>
+                    <button onClick={() => deleteNote(note.id)} className="text-red-400 hover:text-red-600 active:text-red-800 text-xs min-h-[44px] min-w-[44px] flex items-center justify-center">Delete</button>
                   </div>
+                ) : (
+                  <span className="text-gray-300 text-xs shrink-0">saving...</span>
                 )}
               </div>
             )}
