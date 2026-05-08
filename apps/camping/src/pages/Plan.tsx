@@ -8,14 +8,14 @@ import { EssentialsTab } from '../components/EssentialsTab'
 import { NotesTab } from '../components/NotesTab'
 import { LogsTab } from '../components/LogsTab'
 
-const TABS = ['Details', 'Responsibilities', 'People', 'Essentials', 'Notes', 'Logs'] as const
+const TABS = ['Home', 'Personal Items List', 'People', 'Responsibilities', 'Notes', 'Logs'] as const
 type Tab = typeof TABS[number]
 
 const STORAGE_KEY = 'camp_planner_name'
 
 export function PlanPage() {
   const { planId } = useParams()
-  const [activeTab, setActiveTab] = useState<Tab>('Details')
+  const [activeTab, setActiveTab] = useState<Tab>('Home')
   const [exists, setExists] = useState<boolean | null>(null)
   const [userName, setUserName] = useState(() => localStorage.getItem(STORAGE_KEY) || '')
   const [nameInput, setNameInput] = useState('')
@@ -95,10 +95,10 @@ export function PlanPage() {
       </div>
 
       <main className="flex-1 p-4 max-w-2xl mx-auto w-full">
-        {activeTab === 'Details' && <DetailsTab planId={planId!} userName={userName} />}
-        {activeTab === 'Responsibilities' && <ResponsibilitiesTab planId={planId!} userName={userName} />}
+        {activeTab === 'Home' && <DetailsTab planId={planId!} userName={userName} />}
+        {activeTab === 'Personal Items List' && <EssentialsTab planId={planId!} userName={userName} />}
         {activeTab === 'People' && <PeopleTab planId={planId!} userName={userName} />}
-        {activeTab === 'Essentials' && <EssentialsTab planId={planId!} userName={userName} />}
+        {activeTab === 'Responsibilities' && <ResponsibilitiesTab planId={planId!} userName={userName} />}
         {activeTab === 'Notes' && <NotesTab planId={planId!} userName={userName} />}
         {activeTab === 'Logs' && <LogsTab planId={planId!} />}
       </main>

@@ -87,6 +87,7 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
   }
 
   async function deleteNote(id: string) {
+    setNotes((prev) => prev.filter((n) => n.id !== id))
     await supabase.from('camping_notes').delete().eq('id', id)
   }
 
@@ -106,6 +107,8 @@ export function NotesTab({ planId, userName }: { planId: string; userName: strin
 
   return (
     <div>
+      <h2 className="text-lg font-semibold text-gray-800">Notes</h2>
+      <p className="text-sm text-gray-500 mb-4">Share quick updates, ideas, or reminders with the group.</p>
       <form onSubmit={addNote} className="flex gap-2 mb-4">
         <input
           value={newNote}

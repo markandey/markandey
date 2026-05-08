@@ -8,6 +8,38 @@ interface Signup {
   created_at: string
 }
 
+interface TreeNode {
+  label: string
+  signups: Signup[]
+  children: Map<string, TreeNode>
+}
+
+function buildTree(signups: Signup[]): TreeNode {
+  const root: TreeNode = { label: '', signups: [], children: new Map() }
+
+  for (const s of signups) {
+    const parts = s.name.split(':').map((p) => p.trim())
+    if (parts.length === 1) {
+      root.signups.push(s)
+    } else {
+      let node = root
+      for (let i = 0; i < parts.length - 1; i++) {
+        const key = parts[i]
+        if (!node.children.has(key)) {
+          node.children.set(key, { label: key, signups: [], children: new Map() })
+        }
+        node = node.children.get(key)!
+      }
+      node.signups.push({ ...s, name: parts[parts.length - 1] })
+    }
+  }
+  return root
+}
+
+function countPeople(signups: Signup[]): number {
+  return signups.length
+}
+
 export function PeopleTab({ planId, userName }: { planId: string; userName: string }) {
   const [signups, setSignups] = useState<Signup[]>([])
   const [name, setName] = useState(userName)
@@ -55,13 +87,48 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
     await supabase.from('camping_signups').delete().eq('id', id)
   }
 
+  const tree = buildTree(signups)
+
+  function countNode(node: TreeNode): number {
+    let total = node.signups.length
+    for (const child of node.children.values()) {
+      total += countNode(child)
+    }
+    return total
+  }
+
+  function renderNode(node: TreeNode, depth: number = 0) {
+    return (
+      <>
+        {node.signups.map((s) => (
+          <div key={s.id} className={`flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200`} style={{ marginLeft: `${depth * 1.25}rem` }}>
+            <span className="text-sm font-medium">{s.name}</span>
+            {!s.id.startsWith('optimistic-') && (
+              <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
+            )}
+          </div>
+        ))}
+        {Array.from(node.children.values()).map((child) => (
+          <div key={child.label} className="space-y-2">
+            <h3 className="text-sm font-semibold text-gray-700 border-b border-gray-100 pb-1 mt-2" style={{ marginLeft: `${depth * 1.25}rem` }}>
+              {child.label} <span className="text-xs font-normal text-gray-400">({countNode(child)})</span>
+            </h3>
+            {renderNode(child, depth + 1)}
+          </div>
+        ))}
+      </>
+    )
+  }
+
   return (
     <div>
+      <h2 className="text-lg font-semibold text-gray-800">People</h2>
+      <p className="text-sm text-gray-500 mb-4">Who's coming? Use colons to group people (e.g. "veg:markandey" or "family:markandey:agastya" for nested groups).</p>
       <form onSubmit={addSignup} className="flex gap-2 mb-4">
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
-          placeholder="Your name"
+          placeholder="Name or group:subgroup:name"
           className="flex-1 px-3 py-2 border border-gray-300 rounded-lg text-sm outline-none focus:ring-2 focus:ring-green-500"
         />
         <button type="submit" className="px-4 py-2 bg-green-600 text-white text-sm rounded-lg hover:bg-green-700">
@@ -70,12 +137,7 @@ export function PeopleTab({ planId, userName }: { planId: string; userName: stri
       </form>
 
       <div className="space-y-2">
-        {signups.map((s) => (
-          <div key={s.id} className="flex items-center justify-between bg-white p-3 rounded-lg border border-gray-200">
-            <span className="text-sm font-medium">{s.name}</span>
-            <button onClick={() => removeSignup(s.id)} className="text-red-400 hover:text-red-600 text-sm">✕</button>
-          </div>
-        ))}
+        {renderNode(tree)}
       </div>
       {signups.length === 0 && <p className="text-gray-400 text-sm text-center py-8">No one signed up yet</p>}
       {signups.length > 0 && <p className="text-gray-400 text-xs mt-4">{signups.length} going</p>}
